@@ -1,0 +1,136 @@
+!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Консультант-бот</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #ece9e6, #ffffff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat-container {
+      background-color: #fefefe;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      max-width: 90%;
+      padding: 20px;
+    }
+    .chat-box {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      background-color: #fafafa;
+      margin-bottom: 10px;
+    }
+    .chat-box div {
+      margin-bottom: 10px;
+    }
+    .chat-box .user {
+      text-align: right;
+      color: #444;
+      background-color: #e1f5fe;
+      padding: 6px 10px;
+      border-radius: 8px;
+      display: inline-block;
+      max-width: 80%;
+    }
+    .chat-box .bot {
+      text-align: left;
+      color: #222;
+      background-color: #c8e6c9;
+      padding: 6px 10px;
+      border-radius: 8px;
+      display: inline-block;
+      max-width: 80%;
+    }
+    .input-area {
+      display: flex;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 16px;
+      background-color: #42a5f5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1e88e5;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <h2 style="text-align:center; margin-top: 0;">Онлайн-консультант</h2>
+    <div id="chat" class="chat-box"></div>
+    <div class="input-area">
+      <input type="text" id="messageInput" placeholder="Введите сообщение...">
+      <button onclick="sendMessage()">Отправить</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const messageInput = document.getElementById("messageInput");
+      const chatBox = document.getElementById("chat");
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      const userMessage = document.createElement("div");
+      userMessage.className = "user";
+      userMessage.textContent = message;
+      chatBox.appendChild(userMessage);
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+      messageInput.value = "";
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            user_id: "user123",
+            message: message
+          })
+        });
+
+        const data = await response.json();
+        const botMessage = document.createElement("div");
+        botMessage.className = "bot";
+        botMessage.textContent = data.response;
+        chatBox.appendChild(botMessage);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        const errorMessage = document.createElement("div");
+        errorMessage.className = "bot";
+        errorMessage.textContent = "Ошибка соединения с сервером.";
+        chatBox.appendChild(errorMessage);
+      }
+    }
+  </script>
+</body>
+</html>
